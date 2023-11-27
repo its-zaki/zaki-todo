@@ -8,8 +8,10 @@ import {
   addDoc,
   getDocs,
   Timestamp,
+  doc,
+  deleteDoc,
+  updateDoc,
 } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore.js";
-
 
 // getting html tags
 
@@ -43,15 +45,8 @@ logout.addEventListener("click", () => {
 });
 
 //getting user data from firestore function
-
-async function getDataFromFirestore() {
-  let arr = [];
-  const querySnapshot = await getDocs(collection(db, "posts"));
-  querySnapshot.forEach((doc) => {
-    arr.push({...doc.data(), docId: doc.id});
-    // console.log(doc.id);
-  });
-  console.log(arr);
+let arr = [];
+function render() {
   arr.map((item) => {
     card.innerHTML += `
     <div class="card mt-3">
@@ -66,23 +61,85 @@ async function getDataFromFirestore() {
         </div>
     </div>
   </div>`;
-    // console.log(item);
   });
-  const deleted = document.querySelectorAll(".del")
-  const edited = document.querySelectorAll(".edit")
-  deleted.forEach((btn, index)=>{
-    btn.addEventListener('click', ()=>{
+  const deleted = document.querySelectorAll(".del");
+  const edited = document.querySelectorAll(".edit");
+  deleted.forEach((btn, index) => {
+    btn.addEventListener("click", async () => {
       console.log("delete call", index);
-    })
-  })
-  edited.forEach((btn, index)=>{
-    btn.addEventListener('click', ()=>{
-      console.log("edit call" , index);
-    })
-  })
-
+      await deleteDoc(doc(db, "posts", arr[index].docId)).then(() => {
+        console.log("post deleted");
+        arr.splice(index, 1);
+        render();
+      });
+    });
+  });
+  edited.forEach((btn, index) => {
+    btn.addEventListener("click", async () => {
+      console.log("edit call", index);
+      const updatedTitle = prompt("enter new Title");
+      await updateDoc(doc(db, "posts", arr[index].docId), {
+        title: updatedTitle,
+      });
+      arr[index].title = updatedTitle;
+      render();
+    });
+  });
 }
-getDataFromFirestore();
+
+async function getDataFromFirestore() {
+  const querySnapshot = await getDocs(collection(db, "posts"));
+  querySnapshot.forEach((doc) => {
+    arr.push({ ...doc.data(), docId: doc.id });
+    // console.log(doc.id);
+  });
+  console.log(arr);
+  render();
+  // arr.map((item) => {
+  //   card.innerHTML += `
+  //   <div class="card mt-3">
+  //   <div class="card-body ">
+  //       <div class="buttons-div">
+  //       <div>
+  //       <p><span class="h4">${item.title}</span></p>
+  //       </div>
+  //           <div>
+  //               <button class="del" ><i class="ri-delete-bin-line"></i></button><button class="edit"><i class="ri-pencil-fill"></i></button>
+  //           </div>
+  //       </div>
+  //   </div>
+  // </div>`;
+  //   // console.log(item);
+  // });
+  // const deleted = document.querySelectorAll(".del")
+  // const edited = document.querySelectorAll(".edit")
+  // deleted.forEach((btn, index)=>{
+  //   btn.addEventListener('click',async (
+  //   )=>{
+  //     console.log("delete call", index);
+  //     await deleteDoc(doc(db, "posts", arr[index].docId))
+  //     .then(() => {
+  //       console.log('post deleted');
+  //       arr.splice(index, 1);
+  //       render()
+  //   });
+
+  //   })
+  // })
+  // edited.forEach((btn, index)=>{
+  //   btn.addEventListener('click', async()=>{
+  //     console.log("edit call" , index);
+  //     const updatedTitle = prompt('enter new Title');
+  //           await updateDoc(doc(db, "posts", arr[index].docId), {
+  //               title: updatedTitle
+  //           });
+  //           arr[index].title = updatedTitle;
+  //           render()
+  //   })
+  // })
+}
+getDataFromFirestore()
+// render()
 //add data in firestore function
 
 form.addEventListener("submit", async (event) => {
@@ -96,7 +153,7 @@ form.addEventListener("submit", async (event) => {
       postDate: Timestamp.fromDate(new Date()),
     });
     console.log("Document written with ID: ", docRef.id);
-    getDataFromFirestore();
+    render()
   } catch (e) {
     console.error("Error adding document: ", e);
   }
