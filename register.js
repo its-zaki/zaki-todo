@@ -19,6 +19,7 @@ form.addEventListener("submit", (event) => {
       addDoc(collection(db, "users"), {
         names: names,
         email: email.value,
+        uid: auth.currentUser.uid
       })
         .then((res) => {
           console.log(res);

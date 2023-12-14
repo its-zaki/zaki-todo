@@ -140,11 +140,22 @@ body {
     content: counter(20);
   }
   .submit-btn {
-    width: 8vw;
+    width: 20vw;
     height: 5vh;
     
     font-size: 0.9rem;
     
+  }#card{
+     
+      max-width: 400px;
+      overflow: hidden;
+      
+      text-overflow: ellipsis;
+    
+  }
+  .buttons-div {
+    display: flex;
+    flex-direction: column;
   }
   
 }

@@ -29,10 +29,12 @@ onAuthStateChanged(auth, async(user) => {
     const uid = user.uid;
     console.log(uid);
     render(userid)
-    const querySnapshot = await getDocs(collection(db,"users"));
-    querySnapshot.forEach((doc) => {
+    const querySnapshot = await getDocs(collection(db,"users"),where("uid", "==", userid));
+    querySnapshot.forEach((doc, index) => {
+      if(doc.data().uid == userid){
       // console.log(doc.data());
       username.innerHTML = `${doc.data().names}'s Todo`;
+      }
     });
 
   } else {
@@ -46,7 +48,7 @@ const logout = document.querySelector("#logout-btn");
 logout.addEventListener("click", () => {
   signOut(auth)
     .then(() => {
-      console.log("Successfully Logout");
+      // console.log("Successfully Logout");
       window.location = "index.html";
     })
     .catch((error) => {
@@ -70,13 +72,13 @@ async function render(userid) {
     arr.push({ ...doc.data(), docId: doc.id });
     // console.log(doc.id);
   });
-  console.log(arr);
+  // console.log(arr);
 
-  arr.map((item) => {
+ arr.map((item) => {
     card.innerHTML += `
-    <div class="card mt-3">
+  <div class="card mt-3">
     <div class="card-body ">
-        <div class="buttons-div">
+    <div class="buttons-div">
         <div>
         <p><span class="h4">${item.title}</span></p>
         </div>
@@ -91,9 +93,9 @@ async function render(userid) {
   const edited = document.querySelectorAll(".edit");
   deleted.forEach((btn, index) => {
     btn.addEventListener("click", async () => {
-      console.log("delete call", index);
+      // console.log("delete call", index);
       await deleteDoc(doc(db, "posts", arr[index].docId)).then(() => {
-        console.log("post deleted");
+        // console.log("post deleted");
         arr.splice(index, 1);
       });
       render(userid);
@@ -101,7 +103,7 @@ async function render(userid) {
   });
   edited.forEach((btn, index) => {
     btn.addEventListener("click", async () => {
-      console.log("edit call", index);
+      // console.log("edit call", index);
       const updatedTitle = prompt("enter new Title");
       await updateDoc(doc(db, "posts", arr[index].docId), {
         title: updatedTitle,
@@ -123,7 +125,7 @@ form.addEventListener("submit", async (event) => {
     });
     return
   }
-  console.log(title.value);
+  // console.log(title.value);
   card.innerHTML = "";
   try {
     const docRef = await addDoc(collection(db, "posts"), {
